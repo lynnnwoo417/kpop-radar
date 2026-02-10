@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>回归预告机</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #fff5f7 0%, #f8f4ff 50%, #f0f8ff 100%);
+      padding: 32px;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .title {
+      display: block;
+      font-size: 44px;
+      font-weight: 700;
+      color: #2d1b4e;
+      letter-spacing: 2px;
+    }
+
+    .slogan {
+      display: block;
+      font-size: 26px;
+      color: #8b7aa8;
+      margin-top: 12px;
+    }
+
+    .search-wrap {
+      margin: 0 0 24px;
+      position: relative;
+    }
+
+    .search-bar {
+      position: relative;
+      background: #fff;
+      border-radius: 16px;
+      padding: 10px 16px;
+      box-shadow: 0 4px 16px rgba(139, 122, 168, 0.08);
+    }
+
+    .search-input {
+      width: 100%;
+      height: 72px;
+      font-size: 28px;
+      color: #2d1b4e;
+      padding-right: 64px;
+      border: none;
+      outline: none;
+      background: transparent;
+    }
+
+    .search-clear {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 48px;
+      height: 48px;
+      border-radius: 24px;
+      background: rgba(139, 122, 168, 0.15);
+      color: #6b5b95;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      line-height: 1;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .search-panel {
+      margin-top: 12px;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(139, 122, 168, 0.12);
+      position: absolute;
+      left: 0;
+      right: 0;
+      z-index: 100;
+    }
+
+    .search-empty {
+      padding: 28px 24px;
+      font-size: 26px;
+      color: #999;
+    }
+
+    .search-results {
+      max-height: 520px;
+      overflow-y: auto;
+    }
+
+    .search-item {
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      cursor: pointer;
+    }
+
+    .search-item:hover {
+      background: rgba(139, 122, 168, 0.05);
+    }
+
+    .search-item:last-child {
+      border-bottom: none;
+    }
+
+    .search-top {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .search-artist {
+      font-size: 30px;
+      font-weight: 600;
+      color: #2d1b4e;
+      flex: 1;
+    }
+
+    .search-date {
+      font-size: 22px;
+      color: #8b7aa8;
+    }
+
+    .search-bottom {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .search-detail {
+      font-size: 24px;
+      color: #666;
+      flex: 1;
+    }
+
+    .filter-tabs {
+      display: flex;
+      margin-bottom: 24px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 8px;
+      box-shadow: 0 4px 16px rgba(139, 122, 168, 0.08);
+    }
+
+    .filter-tabs .tab {
+      flex: 1;
+      text-align: center;
+      font-size: 26px;
+      color: #8b7aa8;
+      padding: 16px;
+      border-radius: 12px;
+      transition: all 0.2s;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .filter-tabs .tab:hover {
+      background: rgba(139, 122, 168, 0.05);
+    }
+
+    .filter-tabs .tab.active {
+      background: linear-gradient(135deg, #e8d5f0 0%, #d4c4f0 100%);
+      color: #2d1b4e;
+      font-weight: 600;
+    }
+
+    .calendar-wrap {
+      background: #fff;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 8px 32px rgba(139, 122, 168, 0.12);
+      margin-bottom: 32px;
+    }
+
+    .month-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding: 0 8px;
+    }
+
+    .arrow {
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: #6b5b95;
+      font-weight: 300;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .arrow:hover {
+      background: rgba(139, 122, 168, 0.1);
+      border-radius: 50%;
+    }
+
+    .month-label {
+      font-size: 34px;
+      font-weight: 600;
+      color: #2d1b4e;
+    }
+
+    .weekdays {
+      display: flex;
+      margin-bottom: 16px;
+    }
+
+    .weekday {
+      flex: 1;
+      text-align: center;
+      font-size: 24px;
+      color: #8b7aa8;
+    }
+
+    .days-grid {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .day-cell {
+      width: 14.28%;
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border-radius: 12px;
+      box-sizing: border-box;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .day-cell:hover {
+      background: rgba(139, 122, 168, 0.05);
+    }
+
+    .day-num {
+      font-size: 28px;
+      color: #333;
+    }
+
+    .day-cell.other-month .day-num {
+      color: #bbb;
+    }
+
+    .day-cell.today .day-num {
+      font-weight: 700;
+      color: #6b5b95;
+    }
+
+    .day-cell.selected {
+      background: linear-gradient(135deg, #e8d5f0 0%, #d4c4f0 100%);
+    }
+
+    .day-cell.selected .day-num {
+      color: #2d1b4e;
+    }
+
+    .dot {
+      position: absolute;
+      bottom: 12px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #c77eb5;
+    }
+
+    .detail-section {
+      background: #fff;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 8px 32px rgba(139, 122, 168, 0.08);
+    }
+
+    .detail-title {
+      display: block;
+      font-size: 30px;
+      font-weight: 600;
+      color: #2d1b4e;
+      margin-bottom: 20px;
+    }
+
+    .schedule-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .schedule-item {
+      padding: 24px;
+      background: #fff;
+      border-radius: 16px;
+      border-left: 6px solid #c77eb5;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .schedule-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    .item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .item-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-left: auto;
+    }
+
+    .record-btn {
+      font-size: 22px;
+      color: #8b7aa8;
+      padding: 4px 10px;
+      border-radius: 10px;
+      background: rgba(139, 122, 168, 0.12);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .record-btn:hover {
+      background: rgba(139, 122, 168, 0.2);
+    }
+
+    .record-btn.active {
+      color: #8a5b00;
+      background: rgba(255, 210, 80, 0.35);
+    }
+
+    .schedule-item .extra-row {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .schedule-item .extra {
+      font-size: 24px;
+      color: #6b5b95;
+    }
+
+    .schedule-item .detail-link {
+      margin-top: 12px;
+      font-size: 24px;
+      color: #8b7aa8;
+    }
+
+    .schedule-item .artist {
+      display: block;
+      font-size: 32px;
+      font-weight: 600;
+      color: #2d1b4e;
+    }
+
+    .fav-star {
+      font-size: 34px;
+      color: #cfcfcf;
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.2s;
+    }
+
+    .fav-star:hover {
+      color: #f0b429;
+    }
+
+    .fav-star.active {
+      color: #f0b429;
+    }
+
+    .schedule-item .type-row {
+      margin: 8px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .type-tag {
+      display: inline-block;
+      font-size: 22px;
+      padding: 4px 14px;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    .type-regression {
+      background: rgba(199, 126, 181, 0.2);
+      color: #b85a8e;
+    }
+
+    .type-concert {
+      background: rgba(101, 149, 220, 0.2);
+      color: #3d6bb3;
+    }
+
+    .type-fansign {
+      background: rgba(230, 160, 80, 0.25);
+      color: #c47820;
+    }
+
+    .type-activity {
+      background: rgba(86, 200, 150, 0.22);
+      color: #1d8b61;
+    }
+
+    .schedule-item .detail {
+      font-size: 26px;
+      color: #666;
+    }
+
+    .empty-tip {
+      padding: 48px;
+      text-align: center;
+      font-size: 28px;
+      color: #999;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 16px;
+      }
+      
+      .title {
+        font-size: 32px;
+      }
+      
+      .slogan {
+        font-size: 20px;
+      }
+      
+      .search-input {
+        font-size: 24px;
+        height: 56px;
+      }
+      
+      .filter-tabs .tab {
+        font-size: 22px;
+        padding: 12px 8px;
+      }
+      
+      .calendar-wrap {
+        padding: 20px;
+      }
+      
+      .month-label {
+        font-size: 28px;
+      }
+      
+      .day-num {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="title">回归预告机</div>
+      <div class="slogan">打歌预录 · 演唱会 · 签售 · 活动</div>
+    </div>
+
+    <div class="search-wrap">
+      <div class="search-bar">
+        <input
+          class="search-input"
+          id="searchInput"
+          placeholder="搜索团名/标题"
+        />
+        <div class="search-clear" id="searchClear" style="display: none;">×</div>
+      </div>
+      <div class="search-panel" id="searchPanel" style="display: none;">
+        <div class="search-empty" id="searchEmpty" style="display: none;">
+          <span>无匹配结果</span>
+        </div>
+        <div class="search-results" id="searchResults"></div>
+      </div>
+    </div>
+
+    <div class="filter-tabs" id="filterTabs"></div>
+
+    <div class="calendar-wrap">
+      <div class="month-bar">
+        <div class="arrow" id="prevMonth">‹</div>
+        <span class="month-label" id="monthLabel"></span>
+        <div class="arrow" id="nextMonth">›</div>
+      </div>
+      <div class="weekdays" id="weekdays"></div>
+      <div class="days-grid" id="daysGrid"></div>
+    </div>
+
+    <div class="detail-section">
+      <div class="detail-title" id="detailTitle"></div>
+      <div class="schedule-list" id="scheduleList"></div>
+      <div class="empty-tip" id="emptyTip" style="display: none;"></div>
+    </div>
+  </div>
+
+  <script>
+    const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+    const FILTER_TABS = [
+      { key: '全部', label: '全部' },
+      { key: '回归', label: '回归' },
+      { key: '演唱会', label: '演唱会' },
+      { key: '签售', label: '签售' },
+      { key: '活动', label: '活动' }
+    ];
+
+    const FAVORITES_KEY = 'my_favorites';
+    const RECORDS_KEY = 'my_records';
+
+    // 示例数据
+    const y = 2026;
+    let schedules = [
+      { id: 1, artist: 'IVE', type: '回归', date: '02-15', dateKey: `${y}-02-15`, detail: '新专辑回归' },
+      { id: 2, artist: 'G-DRAGON', type: '演唱会', date: '02-06', dateKey: `${y}-02-06`, detail: 'FAM MEETING 2026 · Seoul` },
+      { id: 3, artist: 'LNGSHOT', type: '签售', date: '02-09', dateKey: `${y}-02-09`, detail: 'Fansign Event · London`, ticketPlatform: 'Ktown4u' },
+      { id: 4, artist: 'BTS THE COMEBACK LIVE 购票指南', type: '活动', date: '02-09', dateKey: `${y}-02-09`, detail: '娱乐 · 光化门', locationText: '娱乐 · 光化门', detailUrl: 'https://world.nol.com/zh-CN/regions/b263b346-9a60-49d5-949a-dc88dfbea53e/festas` }
+    ];
+
+    let state = {
+      searchText: '',
+      searchOpen: false,
+      searchResults: [],
+      filterType: '全部',
+      year: new Date().getFullYear(),
+      month: new Date().getMonth() + 1,
+      selectedDateKey: getTodayKey(),
+      selectedDaySchedules: [],
+      calendarDays: []
+    };
+
+    function getTodayKey() {
+      const today = new Date();
+      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    }
+
+    function makeKey(item) {
+      return `${item.detailUrl || ''}|${item.dateKey || ''}|${item.type || ''}|${item.artist || ''}|${item.detail || ''}`;
+    }
+
+    function getFavorites() {
+      try {
+        const v = localStorage.getItem(FAVORITES_KEY);
+        if (!v) return [];
+        return JSON.parse(v);
+      } catch {
+        return [];
+      }
+    }
+
+    function getRecords() {
+      try {
+        const v = localStorage.getItem(RECORDS_KEY);
+        if (!v) return [];
+        return JSON.parse(v);
+      } catch {
+        return [];
+      }
+    }
+
+    function buildCalendar(year, month, schedules, filterType) {
+      const first = new Date(year, month - 1, 1);
+      const last = new Date(year, month, 0);
+      const firstWeekday = first.getDay();
+      const daysInMonth = last.getDate();
+      const todayKey = getTodayKey();
+
+      const list = (() => {
+        if (filterType === '全部') return schedules.filter(s => s.type !== '活动');
+        if (filterType === '签售') return schedules.filter(s => s.type === '签售' && s.ticketPlatform === 'Ktown4u');
+        return schedules.filter(s => s.type === filterType);
+      })();
+      const eventKeys = new Set(list.map(s => s.dateKey));
+
+      const days = [];
+
+      // 上月末尾几天
+      const prevMonth = month === 1 ? 12 : month - 1;
+      const prevYear = month === 1 ? year - 1 : year;
+      const prevLast = new Date(prevYear, prevMonth, 0);
+      const prevDaysCount = prevLast.getDate();
+      for (let i = firstWeekday - 1; i >= 0; i--) {
+        const d = prevDaysCount - i;
+        const dateKey = `${prevYear}-${String(prevMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        days.push({
+          day: d,
+          dateKey,
+          isCurrentMonth: false,
+          isToday: dateKey === todayKey,
+          hasEvent: eventKeys.has(dateKey)
+        });
+      }
+
+      // 本月
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateKey = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        days.push({
+          day: d,
+          dateKey,
+          isCurrentMonth: true,
+          isToday: dateKey === todayKey,
+          hasEvent: eventKeys.has(dateKey)
+        });
+      }
+
+      // 下月开头，凑满 6 行
+      const total = days.length;
+      const rest = total % 7 === 0 ? 0 : 7 - (total % 7);
+      const nextMonth = month === 12 ? 1 : month + 1;
+      const nextYear = month === 12 ? year + 1 : year;
+      for (let d = 1; d <= rest; d++) {
+        const dateKey = `${nextYear}-${String(nextMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        days.push({
+          day: d,
+          dateKey,
+          isCurrentMonth: false,
+          isToday: dateKey === todayKey,
+          hasEvent: eventKeys.has(dateKey)
+        });
+      }
+
+      return days;
+    }
+
+    function updateCalendar() {
+      state.calendarDays = buildCalendar(state.year, state.month, schedules, state.filterType);
+      if (!state.selectedDateKey || !state.calendarDays.some(d => d.dateKey === state.selectedDateKey)) {
+        state.selectedDateKey = getTodayKey();
+      }
+      renderCalendar();
+      updateSelectedDaySchedules();
+    }
+
+    function updateSelectedDaySchedules() {
+      let list = schedules.filter(s => s.dateKey === state.selectedDateKey);
+      if (state.filterType === '全部') {
+        list = list.filter(s => s.type !== '活动');
+      } else if (state.filterType === '签售') {
+        list = list.filter(s => s.type === '签售' && s.ticketPlatform === 'Ktown4u');
+      } else {
+        list = list.filter(s => s.type === state.filterType);
+      }
+
+      const favSet = new Set(getFavorites().map(f => makeKey(f)));
+      const recSet = new Set(getRecords().map(r => makeKey(r)));
+
+      state.selectedDaySchedules = list.map(s => ({
+        ...s,
+        _isFavorite: favSet.has(makeKey(s)),
+        _isRecorded: recSet.has(makeKey(s))
+      }));
+
+      renderSchedules();
+    }
+
+    function renderFilterTabs() {
+      const container = document.getElementById('filterTabs');
+      container.innerHTML = FILTER_TABS.map(tab => `
+        <div class="tab ${state.filterType === tab.key ? 'active' : ''}" 
+             onclick="setFilterType('${tab.key}')">
+          ${tab.label}
+        </div>
+      `).join('');
+    }
+
+    function renderCalendar() {
+      document.getElementById('monthLabel').textContent = `${state.year}年${state.month}月`;
+      
+      const weekdaysEl = document.getElementById('weekdays');
+      weekdaysEl.innerHTML = WEEKDAYS.map(day => `<span class="weekday">${day}</span>`).join('');
+
+      const daysGrid = document.getElementById('daysGrid');
+      daysGrid.innerHTML = state.calendarDays.map(day => `
+        <div class="day-cell ${day.isCurrentMonth ? '' : 'other-month'} ${day.dateKey === state.selectedDateKey ? 'selected' : ''} ${day.isToday ? 'today' : ''}"
+             onclick="selectDate('${day.dateKey}')">
+          <span class="day-num">${day.day}</span>
+          ${day.hasEvent ? '<div class="dot"></div>' : ''}
+        </div>
+      `).join('');
+    }
+
+    function renderSchedules() {
+      const titleEl = document.getElementById('detailTitle');
+      titleEl.textContent = `当日日程 · ${state.selectedDateKey}`;
+
+      const listEl = document.getElementById('scheduleList');
+      const emptyEl = document.getElementById('emptyTip');
+
+      if (state.selectedDaySchedules.length === 0) {
+        listEl.style.display = 'none';
+        emptyEl.style.display = 'block';
+        emptyEl.innerHTML = `<span>该日暂无${state.filterType === '全部' ? '' : state.filterType}日程</span>`;
+      } else {
+        emptyEl.style.display = 'none';
+        listEl.style.display = 'flex';
+        listEl.innerHTML = state.selectedDaySchedules.map((item, index) => `
+          <div class="schedule-item">
+            <div class="item-top">
+              <span class="artist">${item.artist}</span>
+            </div>
+            <div class="type-row">
+              <span class="type-tag ${item.type === '回归' ? 'type-regression' : item.type === '演唱会' ? 'type-concert' : item.type === '签售' ? 'type-fansign' : 'type-activity'}">${item.type}</span>
+              <div class="item-actions">
+                <span class="record-btn ${item._isRecorded ? 'active' : ''}" 
+                      onclick="event.stopPropagation(); handleRecord(${index})">记录</span>
+                <span class="fav-star ${item._isFavorite ? 'active' : ''}" 
+                      onclick="event.stopPropagation(); handleFavorite(${index})">★</span>
+              </div>
+            </div>
+            <div class="detail">${item.detail}</div>
+            ${(item.type === '演唱会' || item.type === '签售') && (item.ticketPlatform || item.ticketTime) ? `
+              <div class="extra-row">
+                ${item.ticketPlatform ? `<span class="extra">购票 ${item.ticketPlatform}</span>` : ''}
+                ${item.ticketTime ? `<span class="extra">场馆 ${item.ticketTime}</span>` : ''}
+              </div>
+            ` : ''}
+            ${item.type === '活动' && item.locationText ? `
+              <div class="extra-row">
+                <span class="extra">地点 ${item.locationText}</span>
+              </div>
+            ` : ''}
+            ${item.type === '回归' && item.showTime ? `
+              <div class="extra-row">
+                <span class="extra">发布时间 ${item.showTime}</span>
+              </div>
+            ` : ''}
+            <div class="detail-link">点击查看详情</div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function setFilterType(type) {
+      state.filterType = type;
+      renderFilterTabs();
+      updateCalendar();
+    }
+
+    function selectDate(dateKey) {
+      state.selectedDateKey = dateKey;
+      renderCalendar();
+      updateSelectedDaySchedules();
+    }
+
+    function prevMonth() {
+      if (state.month === 1) {
+        state.month = 12;
+        state.year -= 1;
+      } else {
+        state.month -= 1;
+      }
+      updateCalendar();
+    }
+
+    function nextMonth() {
+      if (state.month === 12) {
+        state.month = 1;
+        state.year += 1;
+      } else {
+        state.month += 1;
+      }
+      updateCalendar();
+    }
+
+    function handleFavorite(index) {
+      const item = state.selectedDaySchedules[index];
+      if (!item) return;
+
+      const arr = getFavorites();
+      const key = makeKey(item);
+      const exists = arr.some(it => makeKey(it) === key);
+
+      if (exists) {
+        const next = arr.filter(it => makeKey(it) !== key);
+        localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+        alert('已取消收藏');
+      } else {
+        const next = [item].concat(arr);
+        if (next.length > 200) {
+          localStorage.setItem(FAVORITES_KEY, JSON.stringify(next.slice(0, 200)));
+        } else {
+          localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+        }
+        alert('已加入收藏');
+      }
+      updateSelectedDaySchedules();
+    }
+
+    function handleRecord(index) {
+      const item = state.selectedDaySchedules[index];
+      if (!item) return;
+
+      const note = prompt('记录当时心情\n写下追回归的repo…', '');
+      if (note !== null) {
+        const records = getRecords();
+        const key = makeKey(item);
+        const now = new Date();
+        const time = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+        const record = { ...item, note: note.trim(), recordedAt: time };
+        let next = [];
+        let updated = false;
+        for (let i = 0; i < records.length; i++) {
+          const it = records[i];
+          if (makeKey(it) === key) {
+            next.push(record);
+            updated = true;
+          } else {
+            next.push(it);
+          }
+        }
+        if (!updated) next.unshift(record);
+        if (next.length > 300) next = next.slice(0, 300);
+        localStorage.setItem(RECORDS_KEY, JSON.stringify(next));
+        alert('已记录');
+        updateSelectedDaySchedules();
+      }
+    }
+
+    function applySearch(query) {
+      const q = (query || '').trim();
+      if (!q) return [];
+
+      const qn = q.toLowerCase();
+      const results = [];
+      const seen = new Set();
+
+      for (let i = 0; i < schedules.length; i++) {
+        const s = schedules[i];
+        if (s && s.type === '活动') continue;
+        const artist = (s.artist || '').toLowerCase();
+        const detail = (s.detail || '').toLowerCase();
+        const artistIdx = artist.indexOf(qn);
+        const detailIdx = detail.indexOf(qn);
+
+        let field = '';
+        if (artistIdx >= 0) {
+          field = 'artist';
+        } else if (detailIdx >= 0) {
+          field = 'detail';
+        }
+        if (!field) continue;
+
+        const key = makeKey(s);
+        if (seen.has(key)) continue;
+        seen.add(key);
+
+        results.push({ ...s, _matchField: field });
+      }
+
+      results.sort((a, b) => {
+        const da = a.dateKey || '';
+        const db = b.dateKey || '';
+        if (da !== db) return db.localeCompare(da);
+        return (a.artist || '').localeCompare(b.artist || '');
+      });
+
+      return results.slice(0, 20);
+    }
+
+    function handleSearchInput(e) {
+      const value = e.target.value;
+      state.searchText = value;
+      document.getElementById('searchClear').style.display = value ? 'flex' : 'none';
+
+      clearTimeout(window.searchTimer);
+      window.searchTimer = setTimeout(() => {
+        const q = value.trim();
+        if (q) {
+          state.searchResults = applySearch(q);
+          state.searchOpen = true;
+          renderSearch();
+        } else {
+          state.searchOpen = false;
+          document.getElementById('searchPanel').style.display = 'none';
+        }
+      }, 150);
+    }
+
+    function renderSearch() {
+      const panel = document.getElementById('searchPanel');
+      const empty = document.getElementById('searchEmpty');
+      const results = document.getElementById('searchResults');
+
+      if (state.searchResults.length === 0) {
+        panel.style.display = 'block';
+        empty.style.display = 'block';
+        results.innerHTML = '';
+      } else {
+        panel.style.display = 'block';
+        empty.style.display = 'none';
+        results.innerHTML = state.searchResults.map((item, index) => `
+          <div class="search-item" onclick="handleSearchResultClick(${index})">
+            <div class="search-top">
+              <span class="search-artist">${item.artist}</span>
+              <span class="search-date">${item.dateKey}</span>
+            </div>
+            <div class="search-bottom">
+              <span class="type-tag ${item.type === '回归' ? 'type-regression' : item.type === '演唱会' ? 'type-concert' : item.type === '签售' ? 'type-fansign' : 'type-activity'}">${item.type}</span>
+              <span class="search-detail">${item.detail}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    function handleSearchResultClick(index) {
+      const item = state.searchResults[index];
+      if (!item) return;
+      state.searchOpen = false;
+      document.getElementById('searchPanel').style.display = 'none';
+      state.filterType = item.type || '全部';
+      state.selectedDateKey = item.dateKey || state.selectedDateKey;
+      renderFilterTabs();
+      updateCalendar();
+    }
+
+    function handleSearchClear() {
+      state.searchText = '';
+      state.searchOpen = false;
+      document.getElementById('searchInput').value = '';
+      document.getElementById('searchClear').style.display = 'none';
+      document.getElementById('searchPanel').style.display = 'none';
+    }
+
+    // 初始化
+    document.getElementById('searchInput').addEventListener('input', handleSearchInput);
+    document.getElementById('searchInput').addEventListener('focus', () => {
+      if (state.searchText.trim()) {
+        renderSearch();
+      }
+    });
+    document.getElementById('searchInput').addEventListener('blur', () => {
+      setTimeout(() => {
+        state.searchOpen = false;
+        document.getElementById('searchPanel').style.display = 'none';
+      }, 250);
+    });
+    document.getElementById('searchClear').addEventListener('click', handleSearchClear);
+    document.getElementById('prevMonth').addEventListener('click', prevMonth);
+    document.getElementById('nextMonth').addEventListener('click', nextMonth);
+
+    // 暴露全局函数
+    window.setFilterType = setFilterType;
+    window.selectDate = selectDate;
+    window.handleFavorite = handleFavorite;
+    window.handleRecord = handleRecord;
+    window.handleSearchResultClick = handleSearchResultClick;
+
+    // 初始渲染
+    renderFilterTabs();
+    updateCalendar();
+  </script>
+</body>
+</html>
