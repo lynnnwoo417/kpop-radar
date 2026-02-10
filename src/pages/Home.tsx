@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ScheduleItem, SearchResult } from '../types';
+import { ScheduleItem, SearchResult, CalendarDay } from '../types';
 import { fetchSchedules } from '../utils/api';
 import { buildCalendar, getTodayKey } from '../utils/calendar';
 import { applySearch } from '../utils/search';
@@ -28,7 +28,7 @@ export default function Home() {
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [selectedDateKey, setSelectedDateKey] = useState(getTodayKey());
   const [selectedDaySchedules, setSelectedDaySchedules] = useState<ScheduleItem[]>([]);
-  const [calendarDays, setCalendarDays] = useState<ReturnType<typeof buildCalendar>>([]);
+  const [calendarDays, setCalendarDays] = useState<CalendarDay[]>([]);
   const searchTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const loadSchedules = useCallback(async () => {
@@ -55,10 +55,11 @@ export default function Home() {
   const updateCalendar = useCallback(() => {
     const days = buildCalendar(year, month, schedules, filterType);
     setCalendarDays(days);
+    const todayKey = getTodayKey();
     if (!selectedDateKey || !days.some(d => d.dateKey === selectedDateKey)) {
-      setSelectedDateKey(getTodayKey());
+      setSelectedDateKey(todayKey);
     }
-  }, [year, month, schedules, filterType, selectedDateKey]);
+  }, [year, month, schedules, filterType]);
 
   useEffect(() => {
     updateCalendar();
