@@ -545,12 +545,19 @@
     const RECORDS_KEY = 'my_records';
 
     // 示例数据
-    const y = 2026;
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const today = String(now.getDate()).padStart(2, '0');
+    
     let schedules = [
-      { id: 1, artist: 'IVE', type: '回归', date: '02-15', dateKey: `${y}-02-15`, detail: '新专辑回归' },
-      { id: 2, artist: 'G-DRAGON', type: '演唱会', date: '02-06', dateKey: `${y}-02-06`, detail: 'FAM MEETING 2026 · Seoul` },
-      { id: 3, artist: 'LNGSHOT', type: '签售', date: '02-09', dateKey: `${y}-02-09`, detail: 'Fansign Event · London`, ticketPlatform: 'Ktown4u' },
-      { id: 4, artist: 'BTS THE COMEBACK LIVE 购票指南', type: '活动', date: '02-09', dateKey: `${y}-02-09`, detail: '娱乐 · 光化门', locationText: '娱乐 · 光化门', detailUrl: 'https://world.nol.com/zh-CN/regions/b263b346-9a60-49d5-949a-dc88dfbea53e/festas` }
+      { id: 1, artist: 'IVE', type: '回归', date: `${m}-15`, dateKey: `${y}-${m}-15`, detail: '新专辑回归' },
+      { id: 2, artist: 'G-DRAGON', type: '演唱会', date: `${m}-06`, dateKey: `${y}-${m}-06`, detail: 'FAM MEETING 2026 · Seoul' },
+      { id: 3, artist: 'LNGSHOT', type: '签售', date: `${m}-09`, dateKey: `${y}-${m}-09`, detail: 'Fansign Event · London', ticketPlatform: 'Ktown4u' },
+      { id: 4, artist: 'BTS THE COMEBACK LIVE 购票指南', type: '活动', date: `${m}-09`, dateKey: `${y}-${m}-09`, detail: '娱乐 · 光化门', locationText: '娱乐 · 光化门', detailUrl: 'https://world.nol.com/zh-CN/regions/b263b346-9a60-49d5-949a-dc88dfbea53e/festas' },
+      { id: 5, artist: 'NewJeans', type: '回归', date: `${m}-${today}`, dateKey: `${y}-${m}-${today}`, detail: '新单曲发布' },
+      { id: 6, artist: 'aespa', type: '演唱会', date: `${m}-20`, dateKey: `${y}-${m}-20`, detail: 'SYNK : HYPER LINE', ticketPlatform: 'YES24' },
+      { id: 7, artist: 'LE SSERAFIM', type: '签售', date: `${m}-25`, dateKey: `${y}-${m}-25`, detail: '专辑签售会', ticketPlatform: 'Ktown4u' }
     ];
 
     let state = {
